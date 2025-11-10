@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AssemblyName>ChainGuard</AssemblyName>
+    <RootNamespace>ChainGuard</RootNamespace>
+    <PackageId>ChainGuard</PackageId>
+    <Version>1.0.0</Version>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ChainGuard.Core\ChainGuard.Core.csproj" />
+    <ProjectReference Include="..\ChainGuard.Data\ChainGuard.Data.csproj" />
+  </ItemGroup>
+</Project>
