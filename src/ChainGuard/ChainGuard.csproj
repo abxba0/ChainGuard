@@ -11,7 +11,7 @@
   <ItemGroup>
     <ProjectReference Include="..\ChainGuard.Core\ChainGuard.Core.csproj" />
     <ProjectReference Include="..\ChainGuard.Data\ChainGuard.Data.csproj" />
-	  <ProjectReference Include="..\ChainGuard.Core\ChainGuard.Api.csproj" />
-	  <ProjectReference Include="..\ChainGuard.Data\ChainGuard.Dashboard.csproj" />
+	  <ProjectReference Include="..\ChainGuard.Api\ChainGuard.Api.csproj" />
+	  <ProjectReference Include="..\ChainGuard.Dashboard\ChainGuard.Dashboard.csproj" />
   </ItemGroup>
 </Project>
