@@ -1,0 +1,51 @@
+name: Publish NuGet Package
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+  release:
+    types: [published]
+  workflow_dispatch:
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '9.0.x'
+
+    - name: Restore dependencies
+      run: dotnet restore
+
+    - name: Determine version
+      shell: bash
+      run: |
+        if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
+          ver="$GITHUB_REF_NAME"
+        elif [[ -n "${{ github.event.release.tag_name }}" ]]; then
+          ver="${{ github.event.release.tag_name }}"
+        else
+          ver=""
+        fi
+        ver_no_v="${ver#v}"
+        echo "VERSION=${ver_no_v}" >> "$GITHUB_ENV"
+        echo "Version to pack: ${ver_no_v:-'(from csproj)'}"
+
+    - name: Pack NuGet package
+      run: |
+        VERSION_ARG=""
+        if [ -n "${VERSION:-}" ]; then VERSION_ARG="-p:PackageVersion=$VERSION"; fi
+        dotnet pack src/ChainGuard/ChainGuard.csproj -c Release -o out \
+          -p:ContinuousIntegrationBuild=true $VERSION_ARG
+
+    - name: Publish to NuGet
+      env:
+        NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+      run: dotnet nuget push "./out/*.nupkg" --api-key "$NUGET_API_KEY" --source https://api.nuget.org/v3/index.json --skip-duplicate

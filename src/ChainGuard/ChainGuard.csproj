@@ -1,17 +1,27 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-    <AssemblyName>ChainGuard</AssemblyName>
-    <RootNamespace>ChainGuard</RootNamespace>
-    <PackageId>ChainGuard</PackageId>
-    <Version>1.0.0</Version>
-  </PropertyGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\ChainGuard.Core\ChainGuard.Core.csproj" />
-    <ProjectReference Include="..\ChainGuard.Data\ChainGuard.Data.csproj" />
-	  <ProjectReference Include="..\ChainGuard.Api\ChainGuard.Api.csproj" />
-	  <ProjectReference Include="..\ChainGuard.Dashboard\ChainGuard.Dashboard.csproj" />
-  </ItemGroup>
+	<PropertyGroup>
+		<TargetFramework>net9.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+
+		<!-- Assembly/package info -->
+		<PackageId>ChainGuard</PackageId>
+		<Version>0.0.1</Version>
+		<Authors>abxba</Authors>
+		
+		<Description>A lightweight, developer-first .NET SDK that enables developers to integrate verifiable, tamper-evident audit trails into any application.</Description>
+		<PackageTags>security;chain;guard;blockchain;chainguard;dotnet</PackageTags>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<RepositoryUrl>https://github.com/abxba0/ChainGuard</RepositoryUrl>
+
+		<!-- Include XML docs -->
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\ChainGuard.Core\ChainGuard.Core.csproj" />
+		<ProjectReference Include="..\ChainGuard.Data\ChainGuard.Data.csproj" />
+		<ProjectReference Include="..\ChainGuard.Api\ChainGuard.Api.csproj" />
+		<ProjectReference Include="..\ChainGuard.Dashboard\ChainGuard.Dashboard.csproj" />
+	</ItemGroup>
 </Project>
