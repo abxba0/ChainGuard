@@ -1,0 +1,106 @@
+@model ChainGuard.Dashboard.Models.BlockDetailsViewModel
+@{
+    ViewData["Title"] = "Block Inspector";
+}
+
+<div class="container mt-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-controller="Chains" asp-action="Index">Chains</a></li>
+            <li class="breadcrumb-item active">Block #@Model.BlockHeight</li>
+        </ol>
+    </nav>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-primary text-white">
+            <h3 class="mb-0">
+                <i class="bi bi-box"></i> Block Inspector
+                @if (Model.BlockHeight == 0)
+                {
+                    <span class="badge bg-light text-dark ms-2">Genesis Block</span>
+                }
+            </h3>
+        </div>
+        <div class="card-body">
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <strong>Block Height:</strong> @Model.BlockHeight
+                </div>
+                <div class="col-md-6">
+                    <strong>Timestamp:</strong> @Model.Timestamp.ToString("yyyy-MM-dd HH:mm:ss UTC")
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <strong>Block ID:</strong><br/>
+                <code>@Model.BlockId</code>
+            </div>
+
+            <div class="mb-3">
+                <strong>Current Hash:</strong>
+                @if (Model.IsHashValid)
+                {
+                    <span class="badge bg-success ms-2"><i class="bi bi-check-circle"></i> Valid</span>
+                }
+                else
+                {
+                    <span class="badge bg-danger ms-2"><i class="bi bi-x-circle"></i> Invalid</span>
+                }
+                <br/>
+                <code class="d-block mt-2 p-2 bg-light">@Model.CurrentHash</code>
+            </div>
+
+            @if (!string.IsNullOrEmpty(Model.PreviousHash))
+            {
+                <div class="mb-3">
+                    <strong>Previous Hash:</strong><br/>
+                    <code class="d-block mt-2 p-2 bg-light">@Model.PreviousHash</code>
+                </div>
+            }
+            else
+            {
+                <div class="mb-3">
+                    <strong>Previous Hash:</strong> <span class="text-muted">None (Genesis Block)</span>
+                </div>
+            }
+
+            <div class="mb-3">
+                <strong>Payload Hash:</strong><br/>
+                <code class="d-block mt-2 p-2 bg-light">@Model.PayloadHash</code>
+            </div>
+
+            <div class="mb-3">
+                <strong>Nonce:</strong> <code>@Model.Nonce</code>
+            </div>
+
+            <div class="mb-3">
+                <strong>Digital Signature:</strong><br/>
+                <textarea class="form-control mt-2 font-monospace" rows="3" readonly>@Model.Signature</textarea>
+            </div>
+
+            @if (Model.Metadata.Any())
+            {
+                <div class="mb-3">
+                    <strong>Metadata:</strong>
+                    <table class="table table-sm table-bordered mt-2">
+                        <thead>
+                            <tr>
+                                <th>Key</th>
+                                <th>Value</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model.Metadata)
+                            {
+                                <tr>
+                                    <td><code>@item.Key</code></td>
+                                    <td>@item.Value</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+</div>

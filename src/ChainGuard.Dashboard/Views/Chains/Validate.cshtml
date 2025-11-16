@@ -1,0 +1,103 @@
+@model ChainGuard.Dashboard.Models.ChainValidationViewModel
+@{
+    ViewData["Title"] = "Chain Validation Results";
+}
+
+<div class="container mt-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-controller="Chains" asp-action="Index">Chains</a></li>
+            <li class="breadcrumb-item"><a asp-action="Details" asp-route-id="@Model.ChainId">@Model.ChainName</a></li>
+            <li class="breadcrumb-item active">Validation</li>
+        </ol>
+    </nav>
+
+    <div class="card shadow-sm">
+        <div class="card-header @(Model.IsValid ? "bg-success" : "bg-danger") text-white">
+            <h3 class="mb-0">
+                @if (Model.IsValid)
+                {
+                    <i class="bi bi-shield-check"></i> <text>Chain Validation: PASSED</text>
+                }
+                else
+                {
+                    <i class="bi bi-shield-x"></i> <text>Chain Validation: FAILED</text>
+                }
+            </h3>
+        </div>
+        <div class="card-body">
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <strong>Chain:</strong> @Model.ChainName
+                </div>
+                <div class="col-md-6">
+                    <strong>Validated At:</strong> @Model.ValidatedAt.ToString("yyyy-MM-dd HH:mm:ss UTC")
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <strong>Total Blocks:</strong> @Model.TotalBlocks
+                </div>
+                <div class="col-md-6">
+                    <strong>Status:</strong>
+                    @if (Model.IsValid)
+                    {
+                        <span class="badge bg-success">✓ VALID</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-danger">✗ INVALID</span>
+                    }
+                </div>
+            </div>
+
+            @if (Model.IsValid)
+            {
+                <div class="alert alert-success">
+                    <h5><i class="bi bi-check-circle-fill"></i> Chain Integrity Verified</h5>
+                    <p class="mb-0">All blocks in the chain have been verified and the chain integrity is intact. No tampering detected.</p>
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-danger">
+                    <h5><i class="bi bi-exclamation-triangle-fill"></i> Chain Integrity Compromised</h5>
+                    <p>The following issues were detected during validation:</p>
+                </div>
+
+                <h5 class="mt-4">Validation Errors:</h5>
+                <ul class="list-group">
+                    @foreach (var error in Model.Errors)
+                    {
+                        <li class="list-group-item list-group-item-danger">
+                            <i class="bi bi-x-circle"></i> @error
+                        </li>
+                    }
+                </ul>
+
+                @if (Model.InvalidBlockIds.Any())
+                {
+                    <h5 class="mt-4">Invalid Blocks:</h5>
+                    <div class="list-group">
+                        @foreach (var blockId in Model.InvalidBlockIds)
+                        {
+                            <div class="list-group-item">
+                                <code>@blockId</code>
+                                <a asp-action="Block" asp-route-id="@blockId" class="btn btn-sm btn-outline-primary float-end">
+                                    <i class="bi bi-eye"></i> Inspect
+                                </a>
+                            </div>
+                        }
+                    </div>
+                }
+            }
+
+            <div class="mt-4">
+                <a asp-action="Details" asp-route-id="@Model.ChainId" class="btn btn-primary">
+                    <i class="bi bi-arrow-left"></i> Back to Chain
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

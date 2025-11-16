@@ -1,0 +1,108 @@
+@model ChainGuard.Dashboard.Models.ChainDetailsViewModel
+@{
+    ViewData["Title"] = "Chain Details - " + Model.ChainName;
+}
+
+<div class="container mt-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-controller="Chains" asp-action="Index">Chains</a></li>
+            <li class="breadcrumb-item active">@Model.ChainName</li>
+        </ol>
+    </nav>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <h2 class="card-title">
+                @if (Model.IsActive)
+                {
+                    <span class="badge bg-success me-2">Active</span>
+                }
+                else
+                {
+                    <span class="badge bg-secondary me-2">Inactive</span>
+                }
+                @Model.ChainName
+            </h2>
+            <p class="text-muted">@Model.Description</p>
+            <div class="row">
+                <div class="col-md-6">
+                    <strong>Chain ID:</strong> <code>@Model.ChainId</code>
+                </div>
+                <div class="col-md-6">
+                    <strong>Total Blocks:</strong> @Model.Blocks.Count
+                </div>
+            </div>
+            <div class="mt-3">
+                <form asp-action="Validate" method="post" class="d-inline">
+                    <input type="hidden" name="id" value="@Model.ChainId" />
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-shield-check"></i> Validate Chain
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <h3 class="mb-3">Blocks</h3>
+    @if (!Model.Blocks.Any())
+    {
+        <div class="alert alert-info">No blocks in this chain.</div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead class="table-light">
+                    <tr>
+                        <th>Height</th>
+                        <th>Timestamp</th>
+                        <th>Hash</th>
+                        <th>Signature</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var block in Model.Blocks)
+                    {
+                        <tr>
+                            <td>
+                                @if (block.BlockHeight == 0)
+                                {
+                                    <span class="badge bg-info">Genesis</span>
+                                }
+                                else
+                                {
+                                    <span>@block.BlockHeight</span>
+                                }
+                            </td>
+                            <td>
+                                <small>@block.Timestamp.ToString("yyyy-MM-dd HH:mm:ss")</small>
+                            </td>
+                            <td>
+                                <code class="text-truncate d-inline-block" style="max-width: 150px;" title="@block.CurrentHash">
+                                    @block.CurrentHash.Substring(0, Math.Min(16, block.CurrentHash.Length))...
+                                </code>
+                            </td>
+                            <td>
+                                @if (block.HasSignature)
+                                {
+                                    <i class="bi bi-check-circle-fill text-success"></i>
+                                }
+                                else
+                                {
+                                    <i class="bi bi-x-circle-fill text-danger"></i>
+                                }
+                            </td>
+                            <td>
+                                <a asp-action="Block" asp-route-id="@block.BlockId" class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-eye"></i> Inspect
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>

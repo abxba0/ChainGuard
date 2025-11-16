@@ -1,0 +1,66 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-lg-8 mx-auto text-center">
+            <h1 class="display-3 mb-4">
+                <i class="bi bi-shield-lock"></i> ChainGuard Dashboard
+            </h1>
+            <p class="lead mb-5">
+                Blockchain Integrity & Audit SDK for .NET Applications
+            </p>
+
+            <div class="row g-4 mb-5">
+                <div class="col-md-4">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-body text-center">
+                            <i class="bi bi-link-45deg display-4 text-primary"></i>
+                            <h5 class="card-title mt-3">Audit Chains</h5>
+                            <p class="card-text">View and manage tamper-evident audit chains</p>
+                            <a asp-controller="Chains" asp-action="Index" class="btn btn-primary">
+                                <i class="bi bi-arrow-right"></i> Explore Chains
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-body text-center">
+                            <i class="bi bi-shield-check display-4 text-success"></i>
+                            <h5 class="card-title mt-3">Chain Validation</h5>
+                            <p class="card-text">Verify integrity and detect tampering</p>
+                            <a asp-controller="Chains" asp-action="Index" class="btn btn-success">
+                                <i class="bi bi-arrow-right"></i> Validate
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-body text-center">
+                            <i class="bi bi-box display-4 text-info"></i>
+                            <h5 class="card-title mt-3">Block Inspector</h5>
+                            <p class="card-text">Inspect individual blocks in detail</p>
+                            <a asp-controller="Chains" asp-action="Index" class="btn btn-info">
+                                <i class="bi bi-arrow-right"></i> Inspect
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="alert alert-info">
+                <h5><i class="bi bi-info-circle"></i> Features</h5>
+                <ul class="text-start">
+                    <li>✅ Tamper-evident audit trails with SHA-256 hashing</li>
+                    <li>✅ RSA-2048 digital signatures for non-repudiation</li>
+                    <li>✅ AES-256-GCM encryption for off-chain data</li>
+                    <li>✅ Real-time chain integrity validation</li>
+                    <li>✅ GDPR-compliant data separation</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
