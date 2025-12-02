@@ -67,6 +67,7 @@ public class AuditChainTests
         // Assert
         Assert.NotNull(newBlock);
         Assert.Equal(1, newBlock.BlockHeight);
+        Assert.NotNull(newBlock.PreviousHash);
         Assert.NotEmpty(newBlock.PreviousHash);
         Assert.NotEmpty(newBlock.CurrentHash);
         Assert.NotEmpty(newBlock.Signature);
