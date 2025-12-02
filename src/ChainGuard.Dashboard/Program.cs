@@ -12,7 +12,7 @@ builder.Services.AddControllersWithViews();
 
 // Configure SQLite for demo (can be changed to SQL Server in production)
 builder.Services.AddDbContext<ChainGuardDbContext>(options =>
-    options.UseSqlite(builder.Configuration.GetConnectionString("ChainGuard") 
+    options.UseSqlite(builder.Configuration.GetConnectionString("ChainGuard")
         ?? "Data Source=chainguard_dashboard.db"));
 
 // Register RSA singleton for signing/verification

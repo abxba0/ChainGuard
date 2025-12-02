@@ -21,7 +21,7 @@ public class AuditChainServiceTests : IDisposable
 
         _context = new ChainGuardDbContext(options);
         _context.Database.Migrate(); // Apply migrations
-        
+
         _rsa = RSA.Create(2048);
         var chainRepo = new ChainRepository(_context);
         var blockRepo = new BlockRepository(_context);
@@ -42,7 +42,7 @@ public class AuditChainServiceTests : IDisposable
         Assert.NotNull(chain);
         Assert.Equal("test-chain", chain.ChainName);
         Assert.Single(chain.Blocks); // Genesis block
-        
+
         // Verify persistence
         var retrieved = await _service.GetChainAsync(chain.ChainId);
         Assert.NotNull(retrieved);
@@ -64,7 +64,7 @@ public class AuditChainServiceTests : IDisposable
         // Assert
         Assert.NotNull(block);
         Assert.Equal(1, block.BlockHeight);
-        
+
         // Verify persistence
         var retrieved = await _service.GetBlockAsync(block.BlockId);
         Assert.NotNull(retrieved);
@@ -103,13 +103,13 @@ public class AuditChainServiceTests : IDisposable
     public void Dispose()
     {
         _rsa?.Dispose();
-        
+
         // Clean up database
         if (_context != null)
         {
             var dbPath = _context.Database.GetConnectionString()?.Replace("Data Source=", "");
             _context.Dispose();
-            
+
             if (!string.IsNullOrEmpty(dbPath) && File.Exists(dbPath))
             {
                 try

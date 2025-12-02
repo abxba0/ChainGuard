@@ -27,7 +27,7 @@ public class ChainsController : Controller
         {
             var skip = (page - 1) * pageSize;
             var chains = await _chainService.ListChainsAsync(skip, pageSize);
-            
+
             var model = new ChainListViewModel
             {
                 Chains = chains.Select(c => new ChainSummaryViewModel
@@ -132,7 +132,7 @@ public class ChainsController : Controller
         try
         {
             var result = await _chainService.ValidateChainAsync(id);
-            
+
             var model = new ChainValidationViewModel
             {
                 ChainId = result.ChainId,

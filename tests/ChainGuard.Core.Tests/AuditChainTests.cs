@@ -80,7 +80,7 @@ public class AuditChainTests
         var chain = new AuditChain("TestChain", "Test description");
 
         // Act & Assert
-        Assert.Throws<InvalidOperationException>(() => 
+        Assert.Throws<InvalidOperationException>(() =>
             chain.AddBlock(new { UserId = 123, Action = "Login" }));
     }
 
@@ -150,7 +150,7 @@ public class AuditChainTests
         chain.SetRSA(rsa);
         chain.CreateGenesisBlock();
         chain.AddBlock(new { Event = "Event1" });
-        
+
         // Tamper with a block
         chain.Blocks[1].PayloadHash = "tampered";
 
@@ -170,7 +170,7 @@ public class AuditChainTests
         var chain = new AuditChain("TestChain", "Test description");
         chain.CreateGenesisBlock();
         chain.AddBlock(new { Event = "Event1" });
-        
+
         // Break the chain link
         chain.Blocks[1].PreviousHash = "incorrecthash";
 
@@ -188,7 +188,7 @@ public class AuditChainTests
         // Arrange
         var chain = new AuditChain("TestChain", "Test description");
         chain.CreateGenesisBlock();
-        
+
         // Make genesis block invalid
         chain.Blocks[0].PreviousHash = "shouldbenull";
 
@@ -207,7 +207,7 @@ public class AuditChainTests
         var chain = new AuditChain("TestChain", "Test description");
         chain.CreateGenesisBlock();
         chain.AddBlock(new { Event = "Event1" });
-        
+
         // Set invalid timestamp
         chain.Blocks[1].Timestamp = chain.Blocks[0].Timestamp.AddMinutes(-1);
 

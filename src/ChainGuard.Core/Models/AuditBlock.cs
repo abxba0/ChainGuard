@@ -80,7 +80,7 @@ public class AuditBlock
     public string CalculateHash()
     {
         var blockData = $"{BlockId}{BlockHeight}{Timestamp:O}{PreviousHash}{Nonce}{PayloadHash}";
-        
+
         using var sha256 = SHA256.Create();
         var hashBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(blockData));
         return Convert.ToHexString(hashBytes).ToLowerInvariant();

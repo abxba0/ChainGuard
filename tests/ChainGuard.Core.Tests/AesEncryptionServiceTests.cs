@@ -18,7 +18,7 @@ public class AesEncryptionServiceTests
         // Assert
         Assert.NotNull(key);
         Assert.NotEmpty(key);
-        
+
         // Should be valid base64
         var keyBytes = Convert.FromBase64String(key);
         Assert.Equal(32, keyBytes.Length); // 256 bits
@@ -67,7 +67,7 @@ public class AesEncryptionServiceTests
         // Assert
         Assert.NotNull(encrypted);
         Assert.NotEmpty(encrypted);
-        
+
         // Should be valid base64
         var bytes = Convert.FromBase64String(encrypted);
         Assert.True(bytes.Length > 0);
@@ -175,7 +175,7 @@ public class AesEncryptionServiceTests
         var service = new AesEncryptionService(GenerateValidKey());
         var plaintext = "Hello, World!";
         var encrypted = service.Encrypt(plaintext);
-        
+
         // Tamper with the encrypted data
         var bytes = Convert.FromBase64String(encrypted);
         bytes[bytes.Length - 1] ^= 0xFF; // Flip bits in last byte

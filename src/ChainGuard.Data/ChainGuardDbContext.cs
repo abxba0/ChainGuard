@@ -60,7 +60,7 @@ public class ChainGuardDbContext : DbContext
             entity.HasKey(e => e.ChainId);
             entity.Property(e => e.ChainName).IsRequired().HasMaxLength(200);
             entity.Property(e => e.Description).HasMaxLength(1000);
-            
+
             // Configure relationship with blocks
             entity.HasMany(e => e.Blocks)
                   .WithOne(b => b.Chain)
@@ -86,10 +86,10 @@ public class ChainGuardDbContext : DbContext
             // Create individual indexes for performance
             entity.HasIndex(e => e.ChainId)
                   .HasDatabaseName("IX_Blocks_ChainId");
-            
+
             entity.HasIndex(e => e.BlockHeight)
                   .HasDatabaseName("IX_Blocks_BlockHeight");
-            
+
             entity.HasIndex(e => e.Timestamp)
                   .HasDatabaseName("IX_Blocks_Timestamp");
 
@@ -109,10 +109,10 @@ public class ChainGuardDbContext : DbContext
             // Create indexes for performance
             entity.HasIndex(e => e.BlockId)
                   .HasDatabaseName("IX_OffChainData_BlockId");
-            
+
             entity.HasIndex(e => e.DataType)
                   .HasDatabaseName("IX_OffChainData_DataType");
-            
+
             entity.HasIndex(e => e.CreatedAt)
                   .HasDatabaseName("IX_OffChainData_CreatedAt");
         });

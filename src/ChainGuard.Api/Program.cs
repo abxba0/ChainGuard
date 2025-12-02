@@ -12,9 +12,9 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
-    options.SwaggerDoc("v1", new() 
-    { 
-        Title = "ChainGuard API", 
+    options.SwaggerDoc("v1", new()
+    {
+        Title = "ChainGuard API",
         Version = "v1",
         Description = "Blockchain Integrity & Audit SDK for .NET Applications"
     });
@@ -22,7 +22,7 @@ builder.Services.AddSwaggerGen(options =>
 
 // Configure SQLite for demo (can be changed to SQL Server in production)
 builder.Services.AddDbContext<ChainGuardDbContext>(options =>
-    options.UseSqlite(builder.Configuration.GetConnectionString("ChainGuard") 
+    options.UseSqlite(builder.Configuration.GetConnectionString("ChainGuard")
         ?? "Data Source=chainguard.db"));
 
 // Register RSA singleton for signing/verification

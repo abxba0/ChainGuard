@@ -128,7 +128,7 @@ public class ChainsController : ControllerBase
         _logger.LogInformation("Validating chain: {ChainId}", id);
 
         var result = await _chainService.ValidateChainAsync(id, cancellationToken);
-        
+
         var response = new ValidationResponse
         {
             ChainId = result.ChainId,

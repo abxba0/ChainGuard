@@ -152,7 +152,7 @@ public class AuditBlockTests
             PayloadHash = "tampered"
         };
         tamperedBlock.FinalizeBlock();
-        
+
         // Copy signature from original block
         var signatureField = typeof(AuditBlock).GetProperty("Signature")!;
         signatureField.SetValue(tamperedBlock, block.Signature);

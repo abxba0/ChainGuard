@@ -11,10 +11,10 @@ public class DesignTimeDbContextFactory : IDesignTimeDbContextFactory<ChainGuard
     public ChainGuardDbContext CreateDbContext(string[] args)
     {
         var optionsBuilder = new DbContextOptionsBuilder<ChainGuardDbContext>();
-        
+
         // Use SQLite for design-time migrations
         optionsBuilder.UseSqlite("Data Source=chainguard_design.db");
-        
+
         return new ChainGuardDbContext(optionsBuilder.Options);
     }
 }
