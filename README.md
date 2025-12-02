@@ -27,11 +27,7 @@ A lightweight, developer-first .NET SDK that enables developers to integrate **v
 ### Installation
 
 ```bash
-# Core blockchain library
-dotnet add package ChainGuard.Core
-
-# Entity Framework Core data layer
-dotnet add package ChainGuard.Data
+dotnet add package ChainGuard
 ```
 
 ### Basic Usage
@@ -187,6 +183,9 @@ dotnet build
 
 # Run tests
 dotnet test
+
+# Swagger UI 
+dotnet run --project src/ChainGuard.Api
 
 # Run the Dashboard
 dotnet run --project src/ChainGuard.Dashboard
