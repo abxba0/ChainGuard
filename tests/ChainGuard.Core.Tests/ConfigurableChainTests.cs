@@ -108,9 +108,9 @@ public class ConfigurableChainTests
         var block = chain.AddBlock(new { Event = "Test" });
 
         // Assert
-        Assert.True(block.CurrentHash.StartsWith("0"));
-        Assert.True(block.Metadata.ContainsKey("MiningAttempts"));
-        Assert.True(block.Metadata.ContainsKey("MiningTimeMs"));
+        Assert.StartsWith("0", block.CurrentHash);
+        Assert.Contains("MiningAttempts", block.Metadata.Keys);
+        Assert.Contains("MiningTimeMs", block.Metadata.Keys);
     }
 
     [Fact]
@@ -201,7 +201,7 @@ public class ConfigurableChainTests
     }
 
     [Fact]
-    public void ThreadSafety_ConcurrentBlockAddition_ShouldMaintainIntegrity()
+    public async Task ThreadSafety_ConcurrentBlockAddition_ShouldMaintainIntegrity()
     {
         // Arrange
         var chain = new ConfigurableChain("TestChain", "description");
@@ -213,7 +213,7 @@ public class ConfigurableChainTests
         var tasks = Enumerable.Range(0, 10).Select(i =>
             Task.Run(() => chain.AddBlock(new { Index = i }))).ToArray();
 
-        Task.WaitAll(tasks);
+        await Task.WhenAll(tasks);
 
         // Assert - Chain should be valid and have correct number of blocks
         var result = chain.ValidateChain();
