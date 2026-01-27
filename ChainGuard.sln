@@ -19,6 +19,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChainGuard.Core.Tests", "te
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChainGuard.Data.Tests", "tests\ChainGuard.Data.Tests\ChainGuard.Data.Tests.csproj", "{54CC8817-F0D5-40F4-B967-79B7CA2F36C5}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChainGuard.Api.Tests", "tests\ChainGuard.Api.Tests\ChainGuard.Api.Tests.csproj", "{A1B2C3D4-E5F6-4789-ABCD-EF0123456789}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

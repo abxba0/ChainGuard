@@ -32,6 +32,7 @@ public class ChainRepository : IChainRepository
     public async Task<List<ChainEntity>> GetChainsAsync(int skip = 0, int take = 50, CancellationToken cancellationToken = default)
     {
         return await _context.Chains
+            .Include(c => c.Blocks)
             .OrderByDescending(c => c.CreatedAt)
             .Skip(skip)
             .Take(take)

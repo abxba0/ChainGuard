@@ -70,6 +70,16 @@ public class BlockEntity
     public string PayloadHash { get; set; } = string.Empty;
 
     /// <summary>
+    /// Optional payload data (serialized as JSON).
+    /// </summary>
+    public string? PayloadData { get; set; }
+
+    /// <summary>
+    /// Metadata about the payload (serialized as JSON).
+    /// </summary>
+    public string? MetadataJson { get; set; }
+
+    /// <summary>
     /// Timestamp when the block was created.
     /// </summary>
     public DateTime CreatedAt { get; set; }

@@ -160,6 +160,8 @@ public class AuditChainService : IAuditChainService
             Signature = block.Signature,
             Nonce = block.Nonce,
             PayloadHash = block.PayloadHash,
+            PayloadData = block.PayloadData,
+            MetadataJson = block.Metadata.Count > 0 ? JsonSerializer.Serialize(block.Metadata) : null,
             CreatedAt = DateTime.UtcNow
         };
     }
@@ -173,8 +175,22 @@ public class AuditChainService : IAuditChainService
             Timestamp = entity.Timestamp,
             PreviousHash = entity.PreviousHash,
             Nonce = entity.Nonce,
-            PayloadHash = entity.PayloadHash
+            PayloadHash = entity.PayloadHash,
+            PayloadData = entity.PayloadData
         };
+
+        // Restore metadata from JSON
+        if (!string.IsNullOrEmpty(entity.MetadataJson))
+        {
+            var metadata = JsonSerializer.Deserialize<Dictionary<string, string>>(entity.MetadataJson);
+            if (metadata != null)
+            {
+                foreach (var kvp in metadata)
+                {
+                    block.Metadata[kvp.Key] = kvp.Value;
+                }
+            }
+        }
 
         // Use reflection to set private properties
         typeof(AuditBlock).GetProperty("CurrentHash")!.SetValue(block, entity.CurrentHash);

@@ -1,14 +1,16 @@
 using System.Security.Cryptography;
+using System.Text;
+using System.Text.Json;
 
 namespace ChainGuard.Core.Models;
 
 /// <summary>
-/// Represents a blockchain audit chain with validation capabilities.
-/// Thread-safe for concurrent access.
+/// Represents a configurable blockchain with customizable consensus parameters.
 /// </summary>
-public class AuditChain
+public class ConfigurableChain
 {
     private readonly object _lock = new();
+    private RSA? _rsa;
 
     /// <summary>
     /// Unique identifier for this chain.
@@ -36,16 +38,27 @@ public class AuditChain
     public bool IsActive { get; set; }
 
     /// <summary>
-    /// RSA instance for signing and verification.
+    /// Consensus configuration for this chain.
     /// </summary>
-    private RSA? _rsa;
+    public ConsensusConfig Consensus { get; set; }
 
     /// <summary>
-    /// Creates a new audit chain.
+    /// Creation timestamp of the chain.
+    /// </summary>
+    public DateTime CreatedAt { get; set; }
+
+    /// <summary>
+    /// Statistics about the chain.
+    /// </summary>
+    public ChainStatistics Statistics { get; private set; }
+
+    /// <summary>
+    /// Creates a new configurable chain.
     /// </summary>
     /// <param name="chainName">Name of the chain.</param>
     /// <param name="description">Description of the chain's purpose.</param>
-    public AuditChain(string chainName, string description)
+    /// <param name="consensus">Consensus configuration (optional, defaults to None).</param>
+    public ConfigurableChain(string chainName, string description, ConsensusConfig? consensus = null)
     {
         if (string.IsNullOrWhiteSpace(chainName))
             throw new ArgumentException("Chain name cannot be null or empty.", nameof(chainName));
@@ -55,6 +68,14 @@ public class AuditChain
         Description = description ?? string.Empty;
         Blocks = new List<AuditBlock>();
         IsActive = true;
+        Consensus = consensus ?? ConsensusConfig.Default;
+        CreatedAt = DateTime.UtcNow;
+        Statistics = new ChainStatistics();
+
+        // Validate consensus configuration
+        var errors = Consensus.Validate();
+        if (errors.Count > 0)
+            throw new ArgumentException($"Invalid consensus configuration: {string.Join(", ", errors)}");
     }
 
     /// <summary>
@@ -83,18 +104,23 @@ public class AuditChain
                 BlockHeight = 0,
                 PreviousHash = null,
                 PayloadHash = AuditBlock.CalculatePayloadHash(payload),
-                PayloadData = payload != null ? System.Text.Json.JsonSerializer.Serialize(payload) : null
+                PayloadData = payload != null ? JsonSerializer.Serialize(payload) : null
             };
 
             genesisBlock.Metadata["Type"] = "Genesis";
-            genesisBlock.FinalizeBlock();
+            genesisBlock.Metadata["ConsensusType"] = Consensus.Type.ToString();
 
-            if (_rsa != null)
+            // Apply consensus rules
+            ApplyConsensus(genesisBlock);
+
+            // Sign the block if required and RSA is available
+            if (Consensus.RequireSignatures && _rsa != null)
             {
                 genesisBlock.SignBlock(_rsa);
             }
 
             Blocks.Add(genesisBlock);
+            UpdateStatistics(genesisBlock);
             return genesisBlock;
         }
     }
@@ -112,13 +138,21 @@ public class AuditChain
             if (Blocks.Count == 0)
                 throw new InvalidOperationException("Cannot add block to chain without genesis block. Call CreateGenesisBlock first.");
 
+            // Validate payload size if configured
+            if (Consensus.MaxPayloadSizeBytes > 0)
+            {
+                var payloadJson = JsonSerializer.Serialize(payload);
+                if (Encoding.UTF8.GetByteCount(payloadJson) > Consensus.MaxPayloadSizeBytes)
+                    throw new InvalidOperationException($"Payload exceeds maximum size of {Consensus.MaxPayloadSizeBytes} bytes.");
+            }
+
             var previousBlock = Blocks[^1];
             var newBlock = new AuditBlock
             {
                 BlockHeight = previousBlock.BlockHeight + 1,
                 PreviousHash = previousBlock.CurrentHash,
                 PayloadHash = AuditBlock.CalculatePayloadHash(payload),
-                PayloadData = System.Text.Json.JsonSerializer.Serialize(payload)
+                PayloadData = JsonSerializer.Serialize(payload)
             };
 
             if (metadata != null)
@@ -129,15 +163,97 @@ public class AuditChain
                 }
             }
 
-            newBlock.FinalizeBlock();
+            // Apply consensus rules
+            ApplyConsensus(newBlock);
 
-            if (_rsa != null)
+            // Sign the block if required and RSA is available
+            if (Consensus.RequireSignatures && _rsa != null)
             {
                 newBlock.SignBlock(_rsa);
             }
 
             Blocks.Add(newBlock);
+            UpdateStatistics(newBlock);
             return newBlock;
+        }
+    }
+
+    /// <summary>
+    /// Applies consensus rules to a block.
+    /// </summary>
+    /// <param name="block">The block to process.</param>
+    private void ApplyConsensus(AuditBlock block)
+    {
+        switch (Consensus.Type)
+        {
+            case ConsensusType.ProofOfWork:
+                MineBlock(block, Consensus.Difficulty);
+                break;
+
+            case ConsensusType.ProofOfAuthority:
+                // In PoA, the block is validated against authorized validators
+                // The signature verification handles this
+                block.FinalizeBlock();
+                break;
+
+            case ConsensusType.None:
+            default:
+                block.FinalizeBlock();
+                break;
+        }
+    }
+
+    /// <summary>
+    /// Mines a block using Proof of Work.
+    /// </summary>
+    /// <param name="block">The block to mine.</param>
+    /// <param name="difficulty">Number of leading zeros required.</param>
+    private void MineBlock(AuditBlock block, int difficulty)
+    {
+        var target = new string('0', difficulty);
+        var startTime = DateTime.UtcNow;
+        long attempts = 0;
+
+        // Store original nonce and append mining nonce
+        var originalNonce = block.Nonce;
+
+        while (true)
+        {
+            attempts++;
+            block.Nonce = $"{originalNonce}:{attempts}";
+            block.FinalizeBlock();
+
+            if (block.CurrentHash.StartsWith(target))
+            {
+                // Successfully mined
+                var miningTime = DateTime.UtcNow - startTime;
+                block.Metadata["MiningAttempts"] = attempts.ToString();
+                block.Metadata["MiningTimeMs"] = miningTime.TotalMilliseconds.ToString("F2");
+                break;
+            }
+
+            // Prevent infinite loops in testing - cap at 10 million attempts
+            if (attempts > 10_000_000)
+            {
+                throw new InvalidOperationException("Mining failed: exceeded maximum attempts.");
+            }
+        }
+    }
+
+    /// <summary>
+    /// Updates chain statistics after adding a block.
+    /// </summary>
+    /// <param name="block">The newly added block.</param>
+    private void UpdateStatistics(AuditBlock block)
+    {
+        Statistics.TotalBlocks = Blocks.Count;
+        Statistics.LastBlockTime = block.Timestamp;
+        Statistics.LastBlockHeight = block.BlockHeight;
+
+        if (block.Metadata.TryGetValue("MiningAttempts", out var attempts) &&
+            long.TryParse(attempts, out var attemptCount))
+        {
+            Statistics.TotalMiningAttempts += attemptCount;
         }
     }
 
@@ -191,8 +307,20 @@ public class AuditChain
                     result.InvalidBlocks.Add(block.BlockId);
                 }
 
-                // Verify signature if RSA is available
-                if (_rsa != null && !string.IsNullOrEmpty(block.Signature))
+                // Verify PoW if applicable
+                if (Consensus.Type == ConsensusType.ProofOfWork)
+                {
+                    var target = new string('0', Consensus.Difficulty);
+                    if (!block.CurrentHash.StartsWith(target))
+                    {
+                        result.IsValid = false;
+                        result.Errors.Add($"Block {i} (Height: {block.BlockHeight}) does not meet PoW difficulty requirement.");
+                        result.InvalidBlocks.Add(block.BlockId);
+                    }
+                }
+
+                // Verify signature if RSA is available and signatures are required
+                if (Consensus.RequireSignatures && _rsa != null && !string.IsNullOrEmpty(block.Signature))
                 {
                     if (!block.VerifySignature(_rsa))
                     {
@@ -272,4 +400,58 @@ public class AuditChain
             return Blocks.FirstOrDefault(b => b.BlockId == blockId);
         }
     }
+
+    /// <summary>
+    /// Gets the current hash rate (hashes per second) based on recent blocks.
+    /// </summary>
+    /// <returns>Estimated hash rate, or 0 if not applicable.</returns>
+    public double GetHashRate()
+    {
+        if (Consensus.Type != ConsensusType.ProofOfWork || Blocks.Count < 2)
+            return 0;
+
+        var recentBlocks = Blocks.TakeLast(Math.Min(10, Blocks.Count)).ToList();
+        double totalAttempts = 0;
+        double totalTimeMs = 0;
+
+        foreach (var block in recentBlocks)
+        {
+            if (block.Metadata.TryGetValue("MiningAttempts", out var attempts) &&
+                long.TryParse(attempts, out var attemptCount) &&
+                block.Metadata.TryGetValue("MiningTimeMs", out var timeMs) &&
+                double.TryParse(timeMs, out var time))
+            {
+                totalAttempts += attemptCount;
+                totalTimeMs += time;
+            }
+        }
+
+        return totalTimeMs > 0 ? (totalAttempts / totalTimeMs) * 1000 : 0;
+    }
+}
+
+/// <summary>
+/// Statistics about a blockchain.
+/// </summary>
+public class ChainStatistics
+{
+    /// <summary>
+    /// Total number of blocks in the chain.
+    /// </summary>
+    public int TotalBlocks { get; set; }
+
+    /// <summary>
+    /// Timestamp of the last block.
+    /// </summary>
+    public DateTime LastBlockTime { get; set; }
+
+    /// <summary>
+    /// Height of the last block.
+    /// </summary>
+    public int LastBlockHeight { get; set; }
+
+    /// <summary>
+    /// Total mining attempts across all blocks (for PoW chains).
+    /// </summary>
+    public long TotalMiningAttempts { get; set; }
 }

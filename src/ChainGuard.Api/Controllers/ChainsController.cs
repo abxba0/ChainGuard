@@ -32,13 +32,26 @@ public class ChainsController : ControllerBase
         [FromBody] CreateChainRequest request,
         CancellationToken cancellationToken)
     {
+        // Input validation
+        if (string.IsNullOrWhiteSpace(request.ChainName))
+            return BadRequest(new { error = "Chain name is required." });
+
+        if (request.ChainName.Length > 200)
+            return BadRequest(new { error = "Chain name cannot exceed 200 characters." });
+
+        if (string.IsNullOrWhiteSpace(request.Description))
+            return BadRequest(new { error = "Description is required." });
+
+        if (request.Description.Length > 1000)
+            return BadRequest(new { error = "Description cannot exceed 1000 characters." });
+
         try
         {
             _logger.LogInformation("Creating new chain: {ChainName}", request.ChainName);
 
             var chain = await _chainService.CreateChainAsync(
-                request.ChainName,
-                request.Description,
+                request.ChainName.Trim(),
+                request.Description.Trim(),
                 request.GenesisPayload,
                 cancellationToken);
 
@@ -96,11 +109,22 @@ public class ChainsController : ControllerBase
     /// <returns>List of chains.</returns>
     [HttpGet]
     [ProducesResponseType(typeof(IEnumerable<ChainResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<IEnumerable<ChainResponse>>> ListChains(
         [FromQuery] int skip = 0,
         [FromQuery] int take = 50,
         CancellationToken cancellationToken = default)
     {
+        // Validate pagination parameters
+        if (skip < 0)
+            return BadRequest(new { error = "Skip parameter cannot be negative." });
+
+        if (take < 1)
+            return BadRequest(new { error = "Take parameter must be at least 1." });
+
+        if (take > 100)
+            return BadRequest(new { error = "Take parameter cannot exceed 100." });
+
         var chains = await _chainService.ListChainsAsync(skip, take, cancellationToken);
         var response = chains.Select(c => new ChainResponse
         {
@@ -129,6 +153,12 @@ public class ChainsController : ControllerBase
 
         var result = await _chainService.ValidateChainAsync(id, cancellationToken);
 
+        // Check if chain was not found (indicated by "Chain not found." error)
+        if (!result.IsValid && result.Errors.Contains("Chain not found."))
+        {
+            return NotFound(new { error = $"Chain with ID {id} not found." });
+        }
+
         var response = new ValidationResponse
         {
             ChainId = result.ChainId,
@@ -152,12 +182,17 @@ public class ChainsController : ControllerBase
     /// <returns>The created block.</returns>
     [HttpPost("{id:guid}/blocks")]
     [ProducesResponseType(typeof(BlockResponse), StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<BlockResponse>> AddBlock(
         Guid id,
         [FromBody] AddBlockRequest request,
         CancellationToken cancellationToken)
     {
+        // Input validation
+        if (request.Payload == null)
+            return BadRequest(new { error = "Payload is required." });
+
         try
         {
             _logger.LogInformation("Adding block to chain: {ChainId}", id);
@@ -226,19 +261,30 @@ public class ChainsController : ControllerBase
     /// <returns>The created off-chain data ID.</returns>
     [HttpPost("blocks/{blockId:guid}/offchain")]
     [ProducesResponseType(typeof(OffChainDataResponse), StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<OffChainDataResponse>> AddOffChainData(
         Guid blockId,
         [FromBody] AddOffChainDataRequest request,
         CancellationToken cancellationToken)
     {
+        // Input validation
+        if (string.IsNullOrWhiteSpace(request.DataType))
+            return BadRequest(new { error = "DataType is required." });
+
+        if (request.DataType.Length > 100)
+            return BadRequest(new { error = "DataType cannot exceed 100 characters." });
+
+        if (request.Payload == null)
+            return BadRequest(new { error = "Payload is required." });
+
         try
         {
             _logger.LogInformation("Adding encrypted off-chain data to block: {BlockId}", blockId);
 
             var dataId = await _chainService.AddOffChainDataAsync(
                 blockId,
-                request.DataType,
+                request.DataType.Trim(),
                 request.Payload,
                 request.Metadata,
                 cancellationToken);

@@ -66,11 +66,22 @@ public class AuditBlock
     {
         BlockId = Guid.NewGuid();
         Timestamp = DateTime.UtcNow;
-        Nonce = Guid.NewGuid().ToString();
+        Nonce = GenerateCryptographicNonce();
         Metadata = new Dictionary<string, string>();
         CurrentHash = string.Empty;
         Signature = string.Empty;
         PayloadHash = string.Empty;
+    }
+
+    /// <summary>
+    /// Generates a cryptographically secure nonce.
+    /// </summary>
+    /// <returns>A 32-character hex string nonce.</returns>
+    private static string GenerateCryptographicNonce()
+    {
+        var nonceBytes = new byte[16]; // 128 bits
+        RandomNumberGenerator.Fill(nonceBytes);
+        return Convert.ToHexString(nonceBytes).ToLowerInvariant();
     }
 
     /// <summary>
@@ -162,7 +173,11 @@ public class AuditBlock
         if (string.IsNullOrEmpty(PayloadData))
             return string.IsNullOrEmpty(PayloadHash);
 
-        var calculatedHash = CalculatePayloadHash(PayloadData);
+        // PayloadData is already a JSON string, so we hash it directly
+        // rather than calling CalculatePayloadHash which would double-serialize
+        using var sha256 = SHA256.Create();
+        var hashBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(PayloadData));
+        var calculatedHash = Convert.ToHexString(hashBytes).ToLowerInvariant();
         return PayloadHash == calculatedHash;
     }
 }
