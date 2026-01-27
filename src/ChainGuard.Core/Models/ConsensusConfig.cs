@@ -67,7 +67,7 @@ public class ConsensusConfig
     /// <summary>
     /// List of authorized public keys for Proof of Authority consensus.
     /// </summary>
-    public List<string> AuthorizedValidators { get; set; } = new();
+    public List<string> AuthorizedValidators { get; set; } = [];
 
     /// <summary>
     /// Creates a default configuration for audit chains (no consensus).
@@ -98,7 +98,7 @@ public class ConsensusConfig
     public static ConsensusConfig ProofOfAuthority(IEnumerable<string> authorizedValidators) => new()
     {
         Type = ConsensusType.ProofOfAuthority,
-        AuthorizedValidators = authorizedValidators.ToList(),
+        AuthorizedValidators = [.. authorizedValidators],
         RequireSignatures = true
     };
 

@@ -94,9 +94,8 @@ public class AuditChainService : IAuditChainService
         CancellationToken cancellationToken = default)
     {
         // Load existing chain
-        var chainEntity = await _chainRepository.GetChainByIdAsync(chainId, cancellationToken);
-        if (chainEntity == null)
-            throw new InvalidOperationException($"Chain with ID {chainId} not found.");
+        var chainEntity = await _chainRepository.GetChainByIdAsync(chainId, cancellationToken)
+            ?? throw new InvalidOperationException($"Chain with ID {chainId} not found.");
 
         var chain = MapToAuditChain(chainEntity);
         chain.SetRSA(_rsa);
@@ -124,7 +123,7 @@ public class AuditChainService : IAuditChainService
             {
                 ChainId = chainId,
                 IsValid = false,
-                Errors = new List<string> { "Chain not found." }
+                Errors = ["Chain not found."]
             };
         }
 
@@ -144,10 +143,10 @@ public class AuditChainService : IAuditChainService
     public async Task<List<AuditChain>> ListChainsAsync(int skip = 0, int take = 50, CancellationToken cancellationToken = default)
     {
         var chainEntities = await _chainRepository.GetChainsAsync(skip, take, cancellationToken);
-        return chainEntities.Select(MapToAuditChain).ToList();
+        return [.. chainEntities.Select(MapToAuditChain)];
     }
 
-    private BlockEntity MapToBlockEntity(AuditBlock block, Guid chainId)
+    private static BlockEntity MapToBlockEntity(AuditBlock block, Guid chainId)
     {
         return new BlockEntity
         {
@@ -230,15 +229,14 @@ public class AuditChainService : IAuditChainService
         CancellationToken cancellationToken = default)
     {
         // Verify block exists
-        var block = await _blockRepository.GetBlockByIdAsync(blockId, cancellationToken);
-        if (block == null)
-            throw new InvalidOperationException($"Block with ID {blockId} not found.");
+        var block = await _blockRepository.GetBlockByIdAsync(blockId, cancellationToken)
+            ?? throw new InvalidOperationException($"Block with ID {blockId} not found.");
 
         // Serialize payload
         var payloadJson = JsonSerializer.Serialize(payload);
 
         // Encrypt if encryption service is available
-        string? encryptedPayload = null;
+        string encryptedPayload;
         if (_encryptionService != null)
         {
             try

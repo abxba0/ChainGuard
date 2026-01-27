@@ -233,7 +233,7 @@ public static class BlockchainDemonstration
             }));
         }
 
-        Task.WaitAll(tasks.ToArray());
+        Task.WaitAll([.. tasks]);
 
         // Validate the chain
         var result = chain.ValidateChain();

@@ -9,7 +9,7 @@ namespace ChainGuard.Core.Models;
 /// </summary>
 public class ConfigurableChain
 {
-    private readonly object _lock = new();
+    private readonly Lock _lock = new();
     private RSA? _rsa;
 
     /// <summary>
@@ -66,7 +66,7 @@ public class ConfigurableChain
         ChainId = Guid.NewGuid();
         ChainName = chainName;
         Description = description ?? string.Empty;
-        Blocks = new List<AuditBlock>();
+        Blocks = [];
         IsActive = true;
         Consensus = consensus ?? ConsensusConfig.Default;
         CreatedAt = DateTime.UtcNow;
@@ -208,7 +208,7 @@ public class ConfigurableChain
     /// </summary>
     /// <param name="block">The block to mine.</param>
     /// <param name="difficulty">Number of leading zeros required.</param>
-    private void MineBlock(AuditBlock block, int difficulty)
+    private static void MineBlock(AuditBlock block, int difficulty)
     {
         var target = new string('0', difficulty);
         var startTime = DateTime.UtcNow;

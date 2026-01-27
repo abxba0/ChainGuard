@@ -8,7 +8,7 @@ namespace ChainGuard.Core.Models;
 /// </summary>
 public class AuditChain
 {
-    private readonly object _lock = new();
+    private readonly Lock _lock = new();
 
     /// <summary>
     /// Unique identifier for this chain.
@@ -53,7 +53,7 @@ public class AuditChain
         ChainId = Guid.NewGuid();
         ChainName = chainName;
         Description = description ?? string.Empty;
-        Blocks = new List<AuditBlock>();
+        Blocks = [];
         IsActive = true;
     }
 
