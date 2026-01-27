@@ -20,7 +20,7 @@ public class AuditChainServiceTests : IDisposable
             .Options;
 
         _context = new ChainGuardDbContext(options);
-        _context.Database.Migrate(); // Apply migrations
+        _context.Database.EnsureCreated(); // Create schema from current model
 
         _rsa = RSA.Create(2048);
         var chainRepo = new ChainRepository(_context);
