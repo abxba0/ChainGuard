@@ -39,24 +39,26 @@ public static class BlockchainDemonstration
         });
         Console.WriteLine($"Genesis block created: {genesis.CurrentHash[..16]}...");
 
-        // Simulate audit events
-        var events = new[]
-        {
+        // Simulate audit events - add blocks individually since each has different payload structure
+        var block1 = chain.AddBlock(
             new { Event = "UserLogin", UserId = "user123", IP = "192.168.1.1" },
-            new { Event = "DataAccess", UserId = "user123", Resource = "CustomerDB" },
-            new { Event = "DataModification", UserId = "user123", Table = "Customers", RowId = 42 },
-            new { Event = "UserLogout", UserId = "user123", SessionDuration = "01:23:45" }
-        };
+            new Dictionary<string, string> { ["EventType"] = "UserLogin", ["UserId"] = "user123" });
+        Console.WriteLine($"Block {block1.BlockHeight}: UserLogin -> {block1.CurrentHash[..16]}...");
 
-        foreach (var evt in events)
-        {
-            var block = chain.AddBlock(evt, new Dictionary<string, string>
-            {
-                ["EventType"] = evt.Event,
-                ["UserId"] = "user123"
-            });
-            Console.WriteLine($"Block {block.BlockHeight}: {evt.Event} -> {block.CurrentHash[..16]}...");
-        }
+        var block2 = chain.AddBlock(
+            new { Event = "DataAccess", UserId = "user123", Resource = "CustomerDB" },
+            new Dictionary<string, string> { ["EventType"] = "DataAccess", ["UserId"] = "user123" });
+        Console.WriteLine($"Block {block2.BlockHeight}: DataAccess -> {block2.CurrentHash[..16]}...");
+
+        var block3 = chain.AddBlock(
+            new { Event = "DataModification", UserId = "user123", Table = "Customers", RowId = 42 },
+            new Dictionary<string, string> { ["EventType"] = "DataModification", ["UserId"] = "user123" });
+        Console.WriteLine($"Block {block3.BlockHeight}: DataModification -> {block3.CurrentHash[..16]}...");
+
+        var block4 = chain.AddBlock(
+            new { Event = "UserLogout", UserId = "user123", SessionDuration = "01:23:45" },
+            new Dictionary<string, string> { ["EventType"] = "UserLogout", ["UserId"] = "user123" });
+        Console.WriteLine($"Block {block4.BlockHeight}: UserLogout -> {block4.CurrentHash[..16]}...");
 
         // Validate the chain
         var result = chain.ValidateChain();
