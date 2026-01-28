@@ -8,7 +8,6 @@ namespace ChainGuard.Data;
 /// </summary>
 public class ChainGuardDbContext(DbContextOptions<ChainGuardDbContext> options) : DbContext(options)
 {
-
     /// <summary>
     /// Chains in the database.
     /// </summary>
