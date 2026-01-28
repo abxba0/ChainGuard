@@ -6,14 +6,9 @@ namespace ChainGuard.Data.Repositories;
 /// <summary>
 /// Repository implementation for chain operations.
 /// </summary>
-public class ChainRepository : IChainRepository
+public class ChainRepository(ChainGuardDbContext context) : IChainRepository
 {
-    private readonly ChainGuardDbContext _context;
-
-    public ChainRepository(ChainGuardDbContext context)
-    {
-        _context = context ?? throw new ArgumentNullException(nameof(context));
-    }
+    private readonly ChainGuardDbContext _context = context ?? throw new ArgumentNullException(nameof(context));
 
     public async Task<ChainEntity?> GetChainByIdAsync(Guid chainId, CancellationToken cancellationToken = default)
     {
@@ -32,6 +27,7 @@ public class ChainRepository : IChainRepository
     public async Task<List<ChainEntity>> GetChainsAsync(int skip = 0, int take = 50, CancellationToken cancellationToken = default)
     {
         return await _context.Chains
+            .Include(c => c.Blocks)
             .OrderByDescending(c => c.CreatedAt)
             .Skip(skip)
             .Take(take)
@@ -54,7 +50,7 @@ public class ChainRepository : IChainRepository
 
     public async Task DeleteChainAsync(Guid chainId, CancellationToken cancellationToken = default)
     {
-        var chain = await _context.Chains.FindAsync(new object[] { chainId }, cancellationToken);
+        var chain = await _context.Chains.FindAsync([chainId], cancellationToken);
         if (chain != null)
         {
             _context.Chains.Remove(chain);

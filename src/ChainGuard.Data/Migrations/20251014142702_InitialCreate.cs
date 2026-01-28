@@ -8,6 +8,7 @@ namespace ChainGuard.Data.Migrations
     /// <inheritdoc />
     public partial class InitialCreate : Migration
     {
+        private static readonly string[] IndexColumns = ["ChainId", "BlockHeight"];
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -89,7 +90,7 @@ namespace ChainGuard.Data.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_Blocks_ChainId_BlockHeight",
                 table: "Blocks",
-                columns: new[] { "ChainId", "BlockHeight" },
+                columns: IndexColumns,
                 unique: true);
 
             migrationBuilder.CreateIndex(

@@ -5,7 +5,7 @@ namespace ChainGuard.Dashboard.Models;
 /// </summary>
 public class ChainListViewModel
 {
-    public List<ChainSummaryViewModel> Chains { get; set; } = new();
+    public List<ChainSummaryViewModel> Chains { get; set; } = [];
     public int CurrentPage { get; set; }
     public int PageSize { get; set; }
 }
@@ -31,7 +31,7 @@ public class ChainDetailsViewModel
     public string ChainName { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     public bool IsActive { get; set; }
-    public List<BlockSummaryViewModel> Blocks { get; set; } = new();
+    public List<BlockSummaryViewModel> Blocks { get; set; } = [];
 }
 
 /// <summary>
@@ -61,7 +61,7 @@ public class BlockDetailsViewModel
     public string PayloadHash { get; set; } = string.Empty;
     public string Signature { get; set; } = string.Empty;
     public string Nonce { get; set; } = string.Empty;
-    public Dictionary<string, string> Metadata { get; set; } = new();
+    public Dictionary<string, string> Metadata { get; set; } = [];
     public bool IsHashValid { get; set; }
 }
 
@@ -74,7 +74,7 @@ public class ChainValidationViewModel
     public string ChainName { get; set; } = string.Empty;
     public bool IsValid { get; set; }
     public int TotalBlocks { get; set; }
-    public List<string> Errors { get; set; } = new();
-    public List<Guid> InvalidBlockIds { get; set; } = new();
+    public List<string> Errors { get; set; } = [];
+    public List<Guid> InvalidBlockIds { get; set; } = [];
     public DateTime ValidatedAt { get; set; }
 }

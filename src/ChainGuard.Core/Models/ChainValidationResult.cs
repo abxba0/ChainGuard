@@ -45,7 +45,7 @@ public class ChainValidationResult
     /// </summary>
     public ChainValidationResult()
     {
-        Errors = new List<string>();
-        InvalidBlocks = new List<Guid>();
+        Errors = [];
+        InvalidBlocks = [];
     }
 }

@@ -66,11 +66,22 @@ public class AuditBlock
     {
         BlockId = Guid.NewGuid();
         Timestamp = DateTime.UtcNow;
-        Nonce = Guid.NewGuid().ToString();
-        Metadata = new Dictionary<string, string>();
+        Nonce = GenerateCryptographicNonce();
+        Metadata = [];
         CurrentHash = string.Empty;
         Signature = string.Empty;
         PayloadHash = string.Empty;
+    }
+
+    /// <summary>
+    /// Generates a cryptographically secure nonce.
+    /// </summary>
+    /// <returns>A 32-character hex string nonce.</returns>
+    private static string GenerateCryptographicNonce()
+    {
+        var nonceBytes = new byte[16]; // 128 bits
+        RandomNumberGenerator.Fill(nonceBytes);
+        return Convert.ToHexString(nonceBytes).ToLowerInvariant();
     }
 
     /// <summary>
@@ -80,9 +91,7 @@ public class AuditBlock
     public string CalculateHash()
     {
         var blockData = $"{BlockId}{BlockHeight}{Timestamp:O}{PreviousHash}{Nonce}{PayloadHash}";
-
-        using var sha256 = SHA256.Create();
-        var hashBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(blockData));
+        var hashBytes = SHA256.HashData(Encoding.UTF8.GetBytes(blockData));
         return Convert.ToHexString(hashBytes).ToLowerInvariant();
     }
 
@@ -97,8 +106,7 @@ public class AuditBlock
             return string.Empty;
 
         var json = JsonSerializer.Serialize(payload);
-        using var sha256 = SHA256.Create();
-        var hashBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(json));
+        var hashBytes = SHA256.HashData(Encoding.UTF8.GetBytes(json));
         return Convert.ToHexString(hashBytes).ToLowerInvariant();
     }
 
@@ -162,7 +170,10 @@ public class AuditBlock
         if (string.IsNullOrEmpty(PayloadData))
             return string.IsNullOrEmpty(PayloadHash);
 
-        var calculatedHash = CalculatePayloadHash(PayloadData);
+        // PayloadData is already a JSON string, so we hash it directly
+        // rather than calling CalculatePayloadHash which would double-serialize
+        var hashBytes = SHA256.HashData(Encoding.UTF8.GetBytes(PayloadData));
+        var calculatedHash = Convert.ToHexString(hashBytes).ToLowerInvariant();
         return PayloadHash == calculatedHash;
     }
 }

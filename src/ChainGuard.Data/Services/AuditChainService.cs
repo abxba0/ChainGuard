@@ -11,30 +11,20 @@ namespace ChainGuard.Data.Services;
 /// <summary>
 /// Service implementation for managing audit chains with persistence.
 /// </summary>
-public class AuditChainService : IAuditChainService
+public class AuditChainService(
+    IChainRepository chainRepository,
+    IBlockRepository blockRepository,
+    IOffChainDataRepository offChainDataRepository,
+    RSA rsa,
+    IEncryptionService? encryptionService = null,
+    ILogger<AuditChainService>? logger = null) : IAuditChainService
 {
-    private readonly IChainRepository _chainRepository;
-    private readonly IBlockRepository _blockRepository;
-    private readonly IOffChainDataRepository _offChainDataRepository;
-    private readonly RSA _rsa;
-    private readonly IEncryptionService? _encryptionService;
-    private readonly ILogger<AuditChainService>? _logger;
-
-    public AuditChainService(
-        IChainRepository chainRepository,
-        IBlockRepository blockRepository,
-        IOffChainDataRepository offChainDataRepository,
-        RSA rsa,
-        IEncryptionService? encryptionService = null,
-        ILogger<AuditChainService>? logger = null)
-    {
-        _chainRepository = chainRepository ?? throw new ArgumentNullException(nameof(chainRepository));
-        _blockRepository = blockRepository ?? throw new ArgumentNullException(nameof(blockRepository));
-        _offChainDataRepository = offChainDataRepository ?? throw new ArgumentNullException(nameof(offChainDataRepository));
-        _rsa = rsa ?? throw new ArgumentNullException(nameof(rsa));
-        _encryptionService = encryptionService;
-        _logger = logger;
-    }
+    private readonly IChainRepository _chainRepository = chainRepository ?? throw new ArgumentNullException(nameof(chainRepository));
+    private readonly IBlockRepository _blockRepository = blockRepository ?? throw new ArgumentNullException(nameof(blockRepository));
+    private readonly IOffChainDataRepository _offChainDataRepository = offChainDataRepository ?? throw new ArgumentNullException(nameof(offChainDataRepository));
+    private readonly RSA _rsa = rsa ?? throw new ArgumentNullException(nameof(rsa));
+    private readonly IEncryptionService? _encryptionService = encryptionService;
+    private readonly ILogger<AuditChainService>? _logger = logger;
 
     public async Task<AuditChain> CreateChainAsync(
         string chainName,
@@ -94,9 +84,8 @@ public class AuditChainService : IAuditChainService
         CancellationToken cancellationToken = default)
     {
         // Load existing chain
-        var chainEntity = await _chainRepository.GetChainByIdAsync(chainId, cancellationToken);
-        if (chainEntity == null)
-            throw new InvalidOperationException($"Chain with ID {chainId} not found.");
+        var chainEntity = await _chainRepository.GetChainByIdAsync(chainId, cancellationToken)
+            ?? throw new InvalidOperationException($"Chain with ID {chainId} not found.");
 
         var chain = MapToAuditChain(chainEntity);
         chain.SetRSA(_rsa);
@@ -124,7 +113,7 @@ public class AuditChainService : IAuditChainService
             {
                 ChainId = chainId,
                 IsValid = false,
-                Errors = new List<string> { "Chain not found." }
+                Errors = ["Chain not found."]
             };
         }
 
@@ -144,10 +133,10 @@ public class AuditChainService : IAuditChainService
     public async Task<List<AuditChain>> ListChainsAsync(int skip = 0, int take = 50, CancellationToken cancellationToken = default)
     {
         var chainEntities = await _chainRepository.GetChainsAsync(skip, take, cancellationToken);
-        return chainEntities.Select(MapToAuditChain).ToList();
+        return [.. chainEntities.Select(MapToAuditChain)];
     }
 
-    private BlockEntity MapToBlockEntity(AuditBlock block, Guid chainId)
+    private static BlockEntity MapToBlockEntity(AuditBlock block, Guid chainId)
     {
         return new BlockEntity
         {
@@ -160,6 +149,8 @@ public class AuditChainService : IAuditChainService
             Signature = block.Signature,
             Nonce = block.Nonce,
             PayloadHash = block.PayloadHash,
+            PayloadData = block.PayloadData,
+            MetadataJson = block.Metadata.Count > 0 ? JsonSerializer.Serialize(block.Metadata) : null,
             CreatedAt = DateTime.UtcNow
         };
     }
@@ -173,8 +164,22 @@ public class AuditChainService : IAuditChainService
             Timestamp = entity.Timestamp,
             PreviousHash = entity.PreviousHash,
             Nonce = entity.Nonce,
-            PayloadHash = entity.PayloadHash
+            PayloadHash = entity.PayloadHash,
+            PayloadData = entity.PayloadData
         };
+
+        // Restore metadata from JSON
+        if (!string.IsNullOrEmpty(entity.MetadataJson))
+        {
+            var metadata = JsonSerializer.Deserialize<Dictionary<string, string>>(entity.MetadataJson);
+            if (metadata != null)
+            {
+                foreach (var kvp in metadata)
+                {
+                    block.Metadata[kvp.Key] = kvp.Value;
+                }
+            }
+        }
 
         // Use reflection to set private properties
         typeof(AuditBlock).GetProperty("CurrentHash")!.SetValue(block, entity.CurrentHash);
@@ -214,15 +219,14 @@ public class AuditChainService : IAuditChainService
         CancellationToken cancellationToken = default)
     {
         // Verify block exists
-        var block = await _blockRepository.GetBlockByIdAsync(blockId, cancellationToken);
-        if (block == null)
-            throw new InvalidOperationException($"Block with ID {blockId} not found.");
+        var block = await _blockRepository.GetBlockByIdAsync(blockId, cancellationToken)
+            ?? throw new InvalidOperationException($"Block with ID {blockId} not found.");
 
         // Serialize payload
         var payloadJson = JsonSerializer.Serialize(payload);
 
         // Encrypt if encryption service is available
-        string? encryptedPayload = null;
+        string encryptedPayload;
         if (_encryptionService != null)
         {
             try

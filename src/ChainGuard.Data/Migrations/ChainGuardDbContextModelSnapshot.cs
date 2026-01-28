@@ -37,9 +37,15 @@ namespace ChainGuard.Data.Migrations
                         .HasMaxLength(64)
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("MetadataJson")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Nonce")
                         .IsRequired()
                         .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("PayloadData")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("PayloadHash")

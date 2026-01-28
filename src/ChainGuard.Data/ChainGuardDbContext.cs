@@ -6,16 +6,8 @@ namespace ChainGuard.Data;
 /// <summary>
 /// Database context for ChainGuard audit chains.
 /// </summary>
-public class ChainGuardDbContext : DbContext
+public class ChainGuardDbContext(DbContextOptions<ChainGuardDbContext> options) : DbContext(options)
 {
-    /// <summary>
-    /// Creates a new instance of the ChainGuardDbContext.
-    /// </summary>
-    /// <param name="options">The options for this context.</param>
-    public ChainGuardDbContext(DbContextOptions<ChainGuardDbContext> options)
-        : base(options)
-    {
-    }
 
     /// <summary>
     /// Chains in the database.
