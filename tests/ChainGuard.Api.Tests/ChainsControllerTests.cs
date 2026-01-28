@@ -171,8 +171,8 @@ public class ChainsControllerTests
         // Arrange
         var chains = new List<AuditChain>
         {
-            new AuditChain("Chain1", "Description1"),
-            new AuditChain("Chain2", "Description2")
+            new("Chain1", "Description1"),
+            new("Chain2", "Description2")
         };
         chains.ForEach(c => c.CreateGenesisBlock());
 
@@ -259,7 +259,7 @@ public class ChainsControllerTests
         {
             ChainId = chainId,
             IsValid = false,
-            Errors = new List<string> { "Chain not found." }
+            Errors = ["Chain not found."]
         };
 
         _mockChainService

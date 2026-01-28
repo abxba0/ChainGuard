@@ -281,7 +281,7 @@ public class ConsensusConfigTests
         var config = new ConsensusConfig
         {
             Type = ConsensusType.ProofOfAuthority,
-            AuthorizedValidators = new List<string>() // Empty
+            AuthorizedValidators = [] // Empty
         };
 
         // Act

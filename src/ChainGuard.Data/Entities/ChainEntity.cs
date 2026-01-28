@@ -49,5 +49,5 @@ public class ChainEntity
     /// <summary>
     /// Navigation property for blocks in this chain.
     /// </summary>
-    public virtual ICollection<BlockEntity> Blocks { get; set; } = new List<BlockEntity>();
+    public virtual ICollection<BlockEntity> Blocks { get; set; } = [];
 }

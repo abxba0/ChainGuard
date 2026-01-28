@@ -8,16 +8,10 @@ namespace ChainGuard.Api.Controllers;
 /// </summary>
 [ApiController]
 [Route("api/[controller]")]
-public class ChainsController : ControllerBase
+public class ChainsController(IAuditChainService chainService, ILogger<ChainsController> logger) : ControllerBase
 {
-    private readonly IAuditChainService _chainService;
-    private readonly ILogger<ChainsController> _logger;
-
-    public ChainsController(IAuditChainService chainService, ILogger<ChainsController> logger)
-    {
-        _chainService = chainService ?? throw new ArgumentNullException(nameof(chainService));
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-    }
+    private readonly IAuditChainService _chainService = chainService ?? throw new ArgumentNullException(nameof(chainService));
+    private readonly ILogger<ChainsController> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
     /// <summary>
     /// Creates a new audit chain.
@@ -377,7 +371,7 @@ public record BlockResponse
     public string? PreviousHash { get; init; }
     public string CurrentHash { get; init; } = string.Empty;
     public string PayloadHash { get; init; } = string.Empty;
-    public Dictionary<string, string> Metadata { get; init; } = new();
+    public Dictionary<string, string> Metadata { get; init; } = [];
 }
 
 public record ValidationResponse
@@ -386,8 +380,8 @@ public record ValidationResponse
     public string ChainName { get; init; } = string.Empty;
     public bool IsValid { get; init; }
     public int TotalBlocks { get; init; }
-    public List<string> Errors { get; init; } = new();
-    public List<Guid> InvalidBlockIds { get; init; } = new();
+    public List<string> Errors { get; init; } = [];
+    public List<Guid> InvalidBlockIds { get; init; } = [];
     public DateTime ValidatedAt { get; init; }
 }
 

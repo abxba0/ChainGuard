@@ -6,14 +6,9 @@ namespace ChainGuard.Data.Repositories;
 /// <summary>
 /// Repository implementation for block operations.
 /// </summary>
-public class BlockRepository : IBlockRepository
+public class BlockRepository(ChainGuardDbContext context) : IBlockRepository
 {
-    private readonly ChainGuardDbContext _context;
-
-    public BlockRepository(ChainGuardDbContext context)
-    {
-        _context = context ?? throw new ArgumentNullException(nameof(context));
-    }
+    private readonly ChainGuardDbContext _context = context ?? throw new ArgumentNullException(nameof(context));
 
     public async Task<BlockEntity?> GetBlockByIdAsync(Guid blockId, CancellationToken cancellationToken = default)
     {

@@ -93,5 +93,5 @@ public class BlockEntity
     /// <summary>
     /// Navigation property for off-chain data.
     /// </summary>
-    public virtual ICollection<OffChainDataEntity> OffChainData { get; set; } = new List<OffChainDataEntity>();
+    public virtual ICollection<OffChainDataEntity> OffChainData { get; set; } = [];
 }

@@ -7,16 +7,10 @@ namespace ChainGuard.Dashboard.Controllers;
 /// <summary>
 /// Controller for managing and visualizing audit chains in the dashboard.
 /// </summary>
-public class ChainsController : Controller
+public class ChainsController(IAuditChainService chainService, ILogger<ChainsController> logger) : Controller
 {
-    private readonly IAuditChainService _chainService;
-    private readonly ILogger<ChainsController> _logger;
-
-    public ChainsController(IAuditChainService chainService, ILogger<ChainsController> logger)
-    {
-        _chainService = chainService ?? throw new ArgumentNullException(nameof(chainService));
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-    }
+    private readonly IAuditChainService _chainService = chainService ?? throw new ArgumentNullException(nameof(chainService));
+    private readonly ILogger<ChainsController> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
     /// <summary>
     /// Lists all audit chains.
@@ -30,14 +24,14 @@ public class ChainsController : Controller
 
             var model = new ChainListViewModel
             {
-                Chains = chains.Select(c => new ChainSummaryViewModel
+                Chains = [.. chains.Select(c => new ChainSummaryViewModel
                 {
                     ChainId = c.ChainId,
                     ChainName = c.ChainName,
                     Description = c.Description,
                     IsActive = c.IsActive,
                     BlockCount = c.Blocks.Count
-                }).ToList(),
+                })],
                 CurrentPage = page,
                 PageSize = pageSize
             };
@@ -68,7 +62,7 @@ public class ChainsController : Controller
                 ChainName = chain.ChainName,
                 Description = chain.Description,
                 IsActive = chain.IsActive,
-                Blocks = chain.Blocks.Select(b => new BlockSummaryViewModel
+                Blocks = [.. chain.Blocks.Select(b => new BlockSummaryViewModel
                 {
                     BlockId = b.BlockId,
                     BlockHeight = b.BlockHeight,
@@ -77,7 +71,7 @@ public class ChainsController : Controller
                     PreviousHash = b.PreviousHash,
                     PayloadHash = b.PayloadHash,
                     HasSignature = !string.IsNullOrEmpty(b.Signature)
-                }).ToList()
+                })]
             };
 
             return View(model);

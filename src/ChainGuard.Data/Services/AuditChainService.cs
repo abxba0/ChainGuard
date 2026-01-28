@@ -11,30 +11,20 @@ namespace ChainGuard.Data.Services;
 /// <summary>
 /// Service implementation for managing audit chains with persistence.
 /// </summary>
-public class AuditChainService : IAuditChainService
+public class AuditChainService(
+    IChainRepository chainRepository,
+    IBlockRepository blockRepository,
+    IOffChainDataRepository offChainDataRepository,
+    RSA rsa,
+    IEncryptionService? encryptionService = null,
+    ILogger<AuditChainService>? logger = null) : IAuditChainService
 {
-    private readonly IChainRepository _chainRepository;
-    private readonly IBlockRepository _blockRepository;
-    private readonly IOffChainDataRepository _offChainDataRepository;
-    private readonly RSA _rsa;
-    private readonly IEncryptionService? _encryptionService;
-    private readonly ILogger<AuditChainService>? _logger;
-
-    public AuditChainService(
-        IChainRepository chainRepository,
-        IBlockRepository blockRepository,
-        IOffChainDataRepository offChainDataRepository,
-        RSA rsa,
-        IEncryptionService? encryptionService = null,
-        ILogger<AuditChainService>? logger = null)
-    {
-        _chainRepository = chainRepository ?? throw new ArgumentNullException(nameof(chainRepository));
-        _blockRepository = blockRepository ?? throw new ArgumentNullException(nameof(blockRepository));
-        _offChainDataRepository = offChainDataRepository ?? throw new ArgumentNullException(nameof(offChainDataRepository));
-        _rsa = rsa ?? throw new ArgumentNullException(nameof(rsa));
-        _encryptionService = encryptionService;
-        _logger = logger;
-    }
+    private readonly IChainRepository _chainRepository = chainRepository ?? throw new ArgumentNullException(nameof(chainRepository));
+    private readonly IBlockRepository _blockRepository = blockRepository ?? throw new ArgumentNullException(nameof(blockRepository));
+    private readonly IOffChainDataRepository _offChainDataRepository = offChainDataRepository ?? throw new ArgumentNullException(nameof(offChainDataRepository));
+    private readonly RSA _rsa = rsa ?? throw new ArgumentNullException(nameof(rsa));
+    private readonly IEncryptionService? _encryptionService = encryptionService;
+    private readonly ILogger<AuditChainService>? _logger = logger;
 
     public async Task<AuditChain> CreateChainAsync(
         string chainName,

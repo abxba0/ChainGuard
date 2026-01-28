@@ -102,6 +102,7 @@ public class AuditChainServiceTests : IDisposable
 
     public void Dispose()
     {
+        GC.SuppressFinalize(this);
         _rsa?.Dispose();
 
         // Clean up database

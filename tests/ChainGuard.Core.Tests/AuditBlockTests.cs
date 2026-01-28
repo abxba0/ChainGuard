@@ -14,7 +14,7 @@ public class AuditBlockTests
 
         // Assert
         Assert.NotEqual(Guid.Empty, block.BlockId);
-        Assert.NotEqual(default(DateTime), block.Timestamp);
+        Assert.NotEqual(default, block.Timestamp);
         Assert.NotNull(block.Nonce);
         Assert.NotNull(block.Metadata);
         Assert.Empty(block.Metadata);

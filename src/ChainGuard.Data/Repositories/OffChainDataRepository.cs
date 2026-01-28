@@ -6,14 +6,9 @@ namespace ChainGuard.Data.Repositories;
 /// <summary>
 /// Repository implementation for off-chain data operations.
 /// </summary>
-public class OffChainDataRepository : IOffChainDataRepository
+public class OffChainDataRepository(ChainGuardDbContext context) : IOffChainDataRepository
 {
-    private readonly ChainGuardDbContext _context;
-
-    public OffChainDataRepository(ChainGuardDbContext context)
-    {
-        _context = context ?? throw new ArgumentNullException(nameof(context));
-    }
+    private readonly ChainGuardDbContext _context = context ?? throw new ArgumentNullException(nameof(context));
 
     public async Task<OffChainDataEntity?> GetByIdAsync(Guid dataId, CancellationToken cancellationToken = default)
     {
@@ -49,7 +44,7 @@ public class OffChainDataRepository : IOffChainDataRepository
 
     public async Task<bool> DeleteAsync(Guid dataId, CancellationToken cancellationToken = default)
     {
-        var data = await _context.OffChainData.FindAsync(new object[] { dataId }, cancellationToken);
+        var data = await _context.OffChainData.FindAsync([dataId], cancellationToken);
         if (data == null)
             return false;
 

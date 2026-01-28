@@ -178,7 +178,7 @@ public class AesEncryptionServiceTests
 
         // Tamper with the encrypted data
         var bytes = Convert.FromBase64String(encrypted);
-        bytes[bytes.Length - 1] ^= 0xFF; // Flip bits in last byte
+        bytes[^1] ^= 0xFF; // Flip bits in last byte
         var tamperedEncrypted = Convert.ToBase64String(bytes);
 
         // Act & Assert
