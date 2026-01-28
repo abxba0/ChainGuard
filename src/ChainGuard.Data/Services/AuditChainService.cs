@@ -219,7 +219,7 @@ public class AuditChainService(
         CancellationToken cancellationToken = default)
     {
         // Verify block exists
-        var block = await _blockRepository.GetBlockByIdAsync(blockId, cancellationToken)
+        _ = await _blockRepository.GetBlockByIdAsync(blockId, cancellationToken)
             ?? throw new InvalidOperationException($"Block with ID {blockId} not found.");
 
         // Serialize payload
